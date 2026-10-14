@@ -1,0 +1,131 @@
+{
+  "rules_version": "risk_rules_v1",
+  "status": "HEURISTIC / UNVALIDATED research prototype. A prioritisation aid for clinician review. Not a diagnosis, not clinically validated as a whole.",
+  "evidence_legend": {
+    "rfmid_validated": "Image-model discrimination and the two operating points were validated on the RFMiD held-out test set (single centre, three cameras); see docs/MODEL_CARD.md. Not validated on any other population or camera.",
+    "conventional_reference": "Widely used clinical reference value or definition. Not validated as a risk predictor in this system.",
+    "heuristic": "Design choice of this prototype (points, caps, bands, combination matrix, overrides). Not fitted to any data and not validated against any outcome."
+  },
+  "tiers": ["Low", "Moderate", "High"],
+  "eyes": { "right": "od", "left": "os" },
+
+  "image": {
+    "low_threshold_source": "risk_thr_sens95",
+    "high_threshold_source": "risk_thr_maxF1",
+    "threshold_source_note": "Thresholds are read from the model_meta stored with each prediction, so they always match the model that produced the score.",
+    "bands": {
+      "I0": "risk score below the screening threshold",
+      "I1": "risk score at/above the screening threshold but below the max-F1 threshold",
+      "I2": "risk score at/above the max-F1 threshold"
+    },
+    "evidence": {
+      "I0": "rfmid_validated",
+      "I1": "heuristic",
+      "I2": "rfmid_validated"
+    },
+    "evidence_note": "The two thresholds are validated operating points; the meaning of the middle band I1 is not separately validated."
+  },
+
+  "clinical": {
+    "derived_facts": {
+      "any_family_history": { "any_true": ["family_history_glaucoma", "family_history_diabetic_retinopathy", "family_history_amd"] },
+      "symptom_nonspecific": { "any_true": ["blurred_vision", "floaters"] },
+      "cdr_asymmetry": { "abs_diff": ["cdr_od", "cdr_os"], "decimals": 4 }
+    },
+    "domains": {
+      "A": {
+        "label": "Ocular measurements",
+        "cap": 4,
+        "items": [
+          { "id": "iop_gt_21", "label": "IOP > 21 mmHg", "fact": "iop", "op": ">", "value": 21, "points": 2, "evidence": "conventional_reference", "note": "Conventional upper reference limit of intra-ocular pressure; not a diagnostic threshold." },
+          { "id": "cdr_ge_0_6", "label": "Cup-to-disc ratio >= 0.6", "fact": "cdr", "op": ">=", "value": 0.6, "points": 2, "evidence": "conventional_reference", "note": "Commonly used suspicion cut-off; depends on disc size." },
+          { "id": "va_lt_0_3", "label": "Visual acuity < 0.3 (decimal)", "fact": "va", "op": "<", "value": 0.3, "points": 2, "group": "va", "evidence": "conventional_reference", "note": "WHO visual-impairment categories (6/18 = 0.3). Presenting vs corrected acuity is not distinguished." },
+          { "id": "va_lt_0_5", "label": "Visual acuity < 0.5 (decimal)", "fact": "va", "op": "<", "value": 0.5, "points": 1, "group": "va", "evidence": "conventional_reference", "note": "WHO visual-impairment categories (6/12 = 0.5). Only the highest matching VA item counts." },
+          { "id": "cdr_asymmetry_gt_0_2", "label": "Cup-to-disc ratio difference between eyes > 0.2", "fact": "cdr_asymmetry", "op": ">", "value": 0.2, "points": 1, "evidence": "conventional_reference", "note": "Commonly cited inter-eye asymmetry cut-off. Applied to both eyes." }
+        ]
+      },
+      "B": {
+        "label": "Systemic factors",
+        "cap": 3,
+        "items": [
+          { "id": "diabetes", "label": "Diabetes", "fact": "diabetes", "op": "true", "points": 1, "evidence": "heuristic" },
+          { "id": "diabetes_duration_ge_10y", "label": "Diabetes duration >= 10 years", "fact": "diabetes_duration_years", "op": ">=", "value": 10, "points": 1, "evidence": "conventional_reference", "note": "Commonly used duration stratum for diabetic eye disease risk." },
+          { "id": "hypertension", "label": "Hypertension", "fact": "hypertension", "op": "true", "points": 1, "evidence": "heuristic" }
+        ]
+      },
+      "C": {
+        "label": "Symptoms",
+        "cap": 3,
+        "items": [
+          { "id": "visual_field_loss", "label": "Visual field loss", "fact": "visual_field_loss", "op": "true", "points": 1, "evidence": "heuristic" },
+          { "id": "visual_distortion", "label": "Visual distortion", "fact": "visual_distortion", "op": "true", "points": 1, "evidence": "heuristic" },
+          { "id": "eye_pain", "label": "Eye pain", "fact": "eye_pain", "op": "true", "points": 1, "evidence": "heuristic" },
+          { "id": "blurred_vision_or_floaters", "label": "Blurred vision or floaters (non-specific, counted once)", "fact": "symptom_nonspecific", "op": "true", "points": 1, "evidence": "heuristic" }
+        ]
+      },
+      "D": {
+        "label": "Background",
+        "cap": 3,
+        "items": [
+          { "id": "age_ge_60", "label": "Age >= 60 years", "fact": "age", "op": ">=", "value": 60, "points": 1, "evidence": "conventional_reference", "note": "Common age cut-off in AMD / glaucoma epidemiology." },
+          { "id": "family_history_any", "label": "Family history (glaucoma, diabetic retinopathy or AMD)", "fact": "any_family_history", "op": "true", "points": 1, "evidence": "heuristic" },
+          { "id": "previous_condition", "label": "Previous glaucoma, AMD or diabetic retinopathy", "fact": "previous_eye_condition", "op": "in", "value": ["glaucoma", "amd", "diabetic_retinopathy"], "points": 1, "evidence": "heuristic" }
+        ]
+      }
+    },
+    "bands": {
+      "C1_min_score": 3,
+      "C2_min_score": 6,
+      "evidence": "heuristic"
+    },
+    "red_flags": [
+      {
+        "id": "rf_iop_and_cdr_same_eye",
+        "label": "IOP > 21 mmHg and cup-to-disc ratio >= 0.6 in the same eye",
+        "scope": "eye",
+        "all": [
+          { "fact": "iop", "op": ">", "value": 21 },
+          { "fact": "cdr", "op": ">=", "value": 0.6 }
+        ],
+        "evidence": "heuristic"
+      },
+      {
+        "id": "rf_va_lt_0_3_either_eye",
+        "label": "Visual acuity < 0.3 in either eye",
+        "scope": "patient",
+        "any_eye": [
+          { "fact": "va", "op": "<", "value": 0.3 }
+        ],
+        "evidence": "heuristic"
+      },
+      {
+        "id": "rf_field_loss_with_ocular_finding",
+        "label": "Visual field loss together with IOP > 21 mmHg or cup-to-disc ratio >= 0.6 in either eye",
+        "scope": "patient",
+        "all": [
+          { "fact": "visual_field_loss", "op": "true" }
+        ],
+        "any_eye": [
+          { "fact": "iop", "op": ">", "value": 21 },
+          { "fact": "cdr", "op": ">=", "value": 0.6 }
+        ],
+        "evidence": "heuristic"
+      }
+    ]
+  },
+
+  "combination": {
+    "matrix": {
+      "I0": { "C0": "Low", "C1": "Low", "C2": "Moderate" },
+      "I1": { "C0": "Moderate", "C1": "Moderate", "C2": "High" },
+      "I2": { "C0": "High", "C1": "High", "C2": "High" }
+    },
+    "overrides": {
+      "model_needs_review_min_tier": "Moderate",
+      "unassessed_eye_clinical_c2_min_tier": "Moderate"
+    },
+    "patient_tier": "worst_assessed_eye",
+    "evidence": "heuristic",
+    "note": "Clinical findings can raise a tier by at most one level and never lower it. An eye without a usable image is never reported as Low."
+  }
+}

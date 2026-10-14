@@ -1,0 +1,25 @@
+{
+  "SEED": 42,
+  "IMG": 384,
+  "BATCH": 32,
+  "T_RFS": 0.05,
+  "R_MAX": 8.0,
+  "MEAN": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "STD": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "ROT_DEG": 20.0,
+  "SCALE_JIT": 0.1,
+  "TRANS": 0.05,
+  "BRIGHT": 0.2,
+  "CONTRAST": 0.2,
+  "GAMMA_MAX": 1.25,
+  "GAIN": 0.08,
+  "augmentation": "hflip+affine+brightness/contrast/gamma/channel-gain"
+}

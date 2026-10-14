@@ -1,0 +1,19 @@
+# Web / API
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+pydantic>=2.7
+pydantic-settings>=2.3
+email-validator>=2.1
+# Persistence
+sqlalchemy>=2.0
+# Auth
+argon2-cffi>=23.1
+PyJWT>=2.8
+# Imaging
+pillow>=10.3
+numpy>=1.26
+# Model runtime: pinned to the versions the bundle was exported with (docs/environment.txt)
+torch==2.10.0
+timm==1.0.26
+torchvision==0.25.0

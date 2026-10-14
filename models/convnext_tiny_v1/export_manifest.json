@@ -1,0 +1,9 @@
+{
+  "tag": "convnext_tiny_v1",
+  "weights_sha256": "017e5209e27162b81d2fe84bc7cad6291040c14a52e553ab832c20a2957cbb54",
+  "torch": "2.10.0+cu128",
+  "timm": "1.0.26",
+  "torchvision": "0.25.0+cu128",
+  "source_checkpoint": "/kaggle/working/checkpoints/convnext_tiny_v1_best.pt",
+  "checkpoint_epoch": 15
+}

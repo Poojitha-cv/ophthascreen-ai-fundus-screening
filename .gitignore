@@ -1,0 +1,48 @@
+# data/
+# .env
+# __pycache__/
+# *.pyc
+# .pytest_cache/
+# models/convnext_tiny_v1/model_weights.pt
+
+
+
+@'
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+*credentials*
+*password*
+*account_details*
+username.txt
+
+# Local datasets and generated artifacts
+data/
+*.dat
+*.exe
+*.gch
+
+# Model weights and archives
+*.pth
+*.pt
+*.onnx
+*.zip
+
+# Editor and operating-system files
+.vscode/
+.DS_Store
+Thumbs.db
+'@ | Add-Content ".gitignore"
+test_image/
+views/
